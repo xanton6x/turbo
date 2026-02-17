@@ -63,3 +63,32 @@ body {
   width: 100%; padding: 10px; margin: 10px 0;
   background: #121212; border: 1px solid var(--border); color: #fff;
 }
+.auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: start;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
+.auth-switch {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.auth-switch a {
+  color: var(--gold);
+  text-decoration: none;
+}
