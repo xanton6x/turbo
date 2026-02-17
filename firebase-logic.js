@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, where, getDocs, getDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiCZR0dPnvjcxajI6fswQot0z4SSMiDI0",
@@ -12,105 +13,71 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// זיהוי משתמש בדף הבית
+// --- ניהול משתמש בתפריט העליון ---
 const authSection = document.getElementById('auth-section');
-if (authSection) {
-    onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, (user) => {
+    if (authSection) {
         if (user) {
             authSection.innerHTML = `
-                <span style="margin-left:10px;">שלום, ${user.email}</span>
+                <span style="margin-left:15px; font-size:0.9rem;">שלום, ${user.email}</span>
                 <button class="btn-gold" id="logout-btn">התנתק</button>
             `;
             document.getElementById('logout-btn').onclick = () => signOut(auth);
+            if (document.getElementById('reply-section')) document.getElementById('reply-section').style.display = 'block';
+        } else {
+            authSection.innerHTML = `<button class="btn-gold" onclick="location.href='login.html'">התחברות / הרשמה</button>`;
         }
-    });
-}
+    }
+});
 
-// לוגיקה של דף התחברות
-const authForm = document.getElementById('auth-form');
-let isLoginMode = true;
+// --- הצגת נושא ותגובות (view-topic.html) ---
+async function loadFullTopic() {
+    const params = new URLSearchParams(window.location.search);
+    const topicId = params.get('id');
+    if (!topicId) return;
 
-window.toggleAuth = () => {
-    isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').innerText = isLoginMode ? "התחברות" : "הרשמה";
-    document.getElementById('submit-btn').innerText = isLoginMode ? "כניסה" : "צור חשבון";
-    document.getElementById('toggle-text').innerText = isLoginMode ? "אין לך חשבון? הרשם כאן" : "כבר יש לך חשבון? התחבר כאן";
-};
+    // טעינת הפוסט המקורי
+    const docRef = doc(db, "topics", topicId);
+    const docSnap = await getDoc(docRef);
 
-if (authForm) {
-    authForm.onsubmit = async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('topic-title').innerText = data.title;
+        document.getElementById('topic-author').innerText = `פורסם על ידי ${data.authorName} בתאריך ${new Date(data.createdAt.seconds * 1000).toLocaleDateString()}`;
+        document.getElementById('topic-text').innerText = data.content;
+    }
 
-        try {
-            if (isLoginMode) {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } else {
-                await createUserWithEmailAndPassword(auth, email, pass);
-            }
-            window.location.href = 'index.html';
-        } catch (err) {
-            alert("שגיאה: " + err.message);
-        }
-    };
-}
-import { getFirestore, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const db = getFirestore(app);
-
-// פונקציה למשיכת נושאים לפי קטגוריה
-async function loadTopics() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const catId = urlParams.get('cat');
-    if (!catId) return;
-
-    const q = query(collection(db, "topics"), where("categoryId", "==", catId), orderBy("createdAt", "desc"));
+    // טעינת תגובות
+    const q = query(collection(db, "replies"), where("topicId", "==", topicId), orderBy("createdAt", "asc"));
     const querySnapshot = await getDocs(q);
-    const list = document.getElementById('topics-list');
-    list.innerHTML = "";
+    const repliesList = document.getElementById('replies-list');
+    repliesList.innerHTML = "";
 
     querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        list.innerHTML += `
-            <div class="forum-row" onclick="location.href='view-topic.html?id=${doc.id}'">
-                <div class="forum-info">
-                    <h3>${data.title}</h3>
-                    <p>פורסם ע"י: ${data.authorName}</p>
-                </div>
-                <div class="forum-meta">${new Date(data.createdAt.seconds * 1000).toLocaleDateString()}</div>
+        const reply = doc.data();
+        repliesList.innerHTML += `
+            <div class="category-block" style="padding: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold);">
+                <p style="margin: 0; font-size: 0.85rem; color: #888;">${reply.authorName} כתב/ה:</p>
+                <p style="margin: 10px 0 0;">${reply.content}</p>
             </div>
         `;
     });
 }
 
-// כפתור נושא חדש - הצגה רק למחוברים
-onAuthStateChanged(auth, (user) => {
-    if (user && document.getElementById('new-topic-btn')) {
-        document.getElementById('new-topic-btn').style.display = 'block';
-        document.getElementById('new-topic-btn').onclick = () => {
-            document.getElementById('topic-modal').style.display = 'flex';
-        };
-    }
-});
-
-// שמירת נושא חדש
-const saveBtn = document.getElementById('save-topic');
-if (saveBtn) {
-    saveBtn.onclick = async () => {
-        const user = auth.currentUser;
-        const title = document.getElementById('topic-subject').value;
-        const content = document.getElementById('topic-content').value;
-        const catId = new URLSearchParams(window.location.search).get('cat');
-
-        if (title && content) {
-            await addDoc(collection(db, "topics"), {
-                title,
+// שליחת תגובה
+const sendReplyBtn = document.getElementById('send-reply');
+if (sendReplyBtn) {
+    sendReplyBtn.onclick = async () => {
+        const content = document.getElementById('reply-content').value;
+        const topicId = new URLSearchParams(window.location.search).get('id');
+        if (content && auth.currentUser) {
+            await addDoc(collection(db, "replies"), {
+                topicId,
                 content,
-                categoryId: catId,
-                authorId: user.uid,
-                authorName: user.email,
+                authorId: auth.currentUser.uid,
+                authorName: auth.currentUser.email,
                 createdAt: new Date()
             });
             location.reload();
@@ -118,4 +85,6 @@ if (saveBtn) {
     };
 }
 
-if (window.location.pathname.includes('topics.html')) loadTopics();
+// הרצת פונקציות לפי הדף הנוכחי
+if (window.location.pathname.includes('view-topic.html')) loadFullTopic();
+// (כאן אמורה להיות גם פונקציית loadTopics ששלחתי לך קודם עבור topics.html)
