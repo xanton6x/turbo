@@ -1,12 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forum TURBO</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum TURBO | דף הבית</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container header-flex">
+            <div class="logo">FORUM<span>TURBO</span></div>
+            <nav class="nav-links">
+                <a href="index.html">בית</a>
+                <div id="auth-section">
+                    <button class="btn-gold" onclick="location.href='login.html'">התחברות / הרשמה</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="category-block">
+            <div class="cat-header">קהילה ודיונים</div>
+            
+            <div class="forum-row">
+                <div class="forum-info">
+                    <h3>דיונים כלליים</h3>
+                    <p>שיחות על כל נושא שבעולם</p>
+                </div>
+                <div class="forum-meta">1,240 הודעות</div>
+            </div>
+
+            <div class="forum-row">
+                <div class="forum-info">
+                    <h3>חדשות ועדכונים</h3>
+                    <p>כל מה שחדש בקהילה</p>
+                </div>
+                <div class="forum-meta">85 הודעות</div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="firebase-logic.js"></script>
+</body>
 </html>

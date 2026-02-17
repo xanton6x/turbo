@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum TURBO | כניסה</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="logo">FORUM<span>TURBO</span></div>
+            <h2 id="auth-title">התחברות</h2>
+            
+            <form id="auth-form">
+                <input type="email" id="email" placeholder="אימייל" required>
+                <input type="password" id="password" placeholder="סיסמה" required>
+                <button type="submit" id="submit-btn" class="btn-gold">כניסה</button>
+            </form>
+            
+            <p onclick="toggleAuth()" id="toggle-text" style="cursor:pointer; color: #888; margin-top: 15px;">
+                אין לך חשבון? הרשם כאן
+            </p>
+            <a href="index.html" style="color: var(--gold); display: block; margin-top: 10px; text-decoration: none;">חזרה לפורום</a>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-logic.js"></script>
+</body>
+</html>
