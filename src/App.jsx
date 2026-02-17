@@ -3,10 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase-config';
-import './App.css';
-import './i18n';
 
-// Components
+// Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -17,16 +15,17 @@ function App() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    document.body.dir = t('dir');
+    document.body.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
     return () => unsub();
-  }, [t]);
+  }, [i18n.language]);
 
   return (
-    <Router>
+    // basename מבטיח שהקישורים יעבדו תחת /TURBO/
+    <Router basename="/TURBO">
       <div className="app-wrapper">
         <header className="main-header">
           <div className="container header-flex">
-            <Link to="/" className="logo">FORUM<span>COMMUNITY</span></Link>
+            <Link to="/" className="logo">FORUM<span>TURBO</span></Link>
             
             <nav className="nav-links">
               <div className="lang-btns">
@@ -37,7 +36,7 @@ function App() {
 
               {user ? (
                 <div className="user-nav">
-                  <span>{user.email}</span>
+                  <span className="user-email">{user.email}</span>
                   <button className="btn-secondary" onClick={() => signOut(auth)}>{t('logout')}</button>
                 </div>
               ) : (
