@@ -3,118 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Община | Community Board</title>
+    <title>Community Pro | Scryde Style</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;800&family=Inter:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&family=Inter:wght@300;400;600;800&display=swap');
         
         :root {
-            --scryde-bg: #eef2f5;
-            --scryde-header: #1a1c23;
-            --scryde-accent: #2563eb;
-            --scryde-card: #ffffff;
-            --scryde-border: #dce3e8;
+            --sc-dark: #1a1c23;
+            --sc-blue: #2563eb;
+            --sc-bg: #ebf0f3;
+            --sc-border: #dce3e8;
         }
 
-        body { font-family: 'Inter', 'Assistant', sans-serif; background-color: var(--scryde-bg); }
-        .rtl { direction: rtl; text-align: right; }
+        body { font-family: 'Inter', 'Assistant', sans-serif; background: var(--sc-bg); scroll-behavior: smooth; }
+        .rtl { direction: rtl; }
         
-        /* סגנון הדר של Scryde */
-        .header-scryde { background: var(--scryde-header); color: white; }
-        .nav-link { color: #a0aec0; font-weight: 500; transition: color 0.2s; }
-        .nav-link:hover { color: white; }
+        /* אנימציית מעבר דפים */
+        .page-transition { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* סגנון קטגוריות */
-        .forum-category-header {
-            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-            border: 1px solid var(--scryde-border);
-            padding: 12px 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #4a5568;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-        }
-
-        .forum-item {
-            background: white;
-            border: 1px solid var(--scryde-border);
-            border-top: none;
-            transition: background 0.1s;
-        }
-        .forum-item:hover { background: #fdfdfd; }
-        .forum-item:last-child { border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
-
-        .active-lang { color: var(--scryde-accent) !important; font-weight: 700; }
-        .btn-primary { background: var(--scryde-accent); color: white; padding: 8px 16px; border-radius: 4px; font-weight: 600; }
+        .sc-card { background: white; border: 1px solid var(--sc-border); border-radius: 4px; overflow: hidden; }
+        .sc-header { background: var(--sc-dark); color: white; }
         
-        .view-section { display: none; }
-        .active-view { display: block !important; }
+        /* סטטוס אדמין */
+        .admin-badge { background: #ef4444; color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
+        
+        .nav-tab { border-bottom: 3px solid transparent; transition: 0.2s; }
+        .nav-tab.active { border-color: var(--sc-blue); color: var(--sc-blue); }
+
+        /* Loader */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--sc-blue); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <header class="header-scryde shadow-md">
-        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <div class="text-xl font-black cursor-pointer tracking-tight" onclick="switchView('home')">
-                    SCRYDE<span class="text-blue-500">BOARD</span>
+    <nav class="sc-header shadow-xl sticky top-0 z-[100]">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <div class="text-2xl font-black tracking-tighter cursor-pointer" onclick="switchView('home')">
+                    SCRYDE<span class="text-blue-500 font-light">BOARD</span>
                 </div>
-                <nav class="hidden md:flex gap-4 text-sm">
-                    <button onclick="switchView('home')" class="nav-link" data-i18n="forums">Forums</button>
-                    <button class="nav-link" data-i18n="members">Members</button>
-                </nav>
+                <div class="hidden md:flex gap-6 text-sm font-bold text-slate-400">
+                    <button onclick="switchView('home')" class="hover:text-white transition">FORUMS</button>
+                    <button class="hover:text-white transition">STAFF</button>
+                </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-                <div class="flex gap-2 text-[11px] uppercase border-r border-slate-700 pr-4 mr-2">
-                    <button onclick="changeLang('ru')" id="lang-ru" class="nav-link">RU</button>
-                    <button onclick="changeLang('en')" id="lang-en" class="nav-link">EN</button>
-                    <button onclick="changeLang('he')" id="lang-he" class="nav-link">HE</button>
+
+            <div class="flex items-center gap-5">
+                <div class="flex bg-white/10 rounded-lg p-1">
+                    <button onclick="changeLang('ru')" class="px-3 py-1 text-[10px] font-bold hover:text-blue-400">RU</button>
+                    <button onclick="changeLang('he')" class="px-3 py-1 text-[10px] font-bold hover:text-blue-400">HE</button>
                 </div>
-                <div id="user-zone"></div>
+                <div id="auth-zone">
+                    <div class="loader"></div>
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <div class="bg-white border-b py-3 mb-6 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-            <div class="flex items-center gap-2">
-                <span class="hover:underline cursor-pointer" onclick="switchView('home')">Home</span>
-                <span>/</span>
-                <span id="current-breadcrumb" data-i18n="forums">Forums</span>
-            </div>
-            <div id="search-box">
-                <input type="text" placeholder="Search..." class="border rounded px-3 py-1 outline-none focus:border-blue-400">
-            </div>
-        </div>
-    </div>
-
-    <main id="main-grid" class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-12">
+    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <section class="lg:col-span-9">
+        <section class="lg:col-span-9 page-transition">
             
-            <div id="view-home" class="view-section active-view">
-                <div class="forum-category-header" data-i18n="mainCategory">GENERAL DISCUSSIONS</div>
-                <div id="forum-content">
-                    </div>
+            <div id="view-home" class="view-section active-view space-y-8">
+                <div id="categories-container" class="space-y-10"></div>
+                
+                <div id="admin-controls" class="hidden border-2 border-dashed border-slate-300 p-4 rounded-xl text-center">
+                    <button onclick="openModal('cat-modal')" class="text-slate-500 font-bold hover:text-blue-600 transition">+ Добавить категорию (Admin)</button>
+                </div>
             </div>
 
-            <div id="view-post" class="view-section">
-                <div id="post-container" class="bg-white border rounded shadow-sm overflow-hidden">
-                    </div>
-                <div class="mt-6">
-                    <div class="forum-category-header" data-i18n="replies">REPLIES</div>
-                    <div id="comments-list" class="bg-white border border-t-0 rounded-b shadow-sm"></div>
-                    
-                    <div class="mt-4 bg-white p-4 border rounded shadow-sm">
-                        <textarea id="comm-input" class="w-full border p-3 rounded text-sm outline-none focus:border-blue-500" rows="3" data-i18n-placeholder="replyPlaceholder"></textarea>
-                        <div class="flex justify-end mt-2">
-                            <button onclick="addComment()" class="btn-primary text-sm" data-i18n="postReply">Post Reply</button>
+            <div id="view-forum" class="view-section hidden">
+                <button onclick="switchView('home')" class="mb-4 text-sm font-bold text-blue-600">← Back to Categories</button>
+                <div class="sc-card shadow-sm">
+                    <div id="forum-title" class="bg-slate-100 p-4 font-black border-b uppercase text-slate-600"></div>
+                    <div id="topics-list" class="divide-y"></div>
+                </div>
+            </div>
+
+            <div id="view-post" class="view-section hidden">
+                <div id="post-content"></div>
+                <div class="mt-8 space-y-4" id="replies-container">
+                    <h3 class="font-bold text-slate-400 text-sm uppercase">Replies</h3>
+                    <div id="comments-list" class="space-y-4"></div>
+                    <div class="bg-white p-6 border rounded-xl shadow-sm">
+                        <textarea id="comm-input" placeholder="Write your reply..." class="w-full bg-slate-50 border rounded-xl p-4 outline-none focus:ring-2 ring-blue-500 transition-all mb-4"></textarea>
+                        <div class="flex justify-end">
+                            <button onclick="addComment()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Post Reply</button>
                         </div>
                     </div>
                 </div>
@@ -122,70 +102,59 @@
         </section>
 
         <aside class="lg:col-span-3 space-y-6">
-            <button onclick="openModal('topic-modal')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded shadow-md transition-all active:scale-95" data-i18n="postThread">
-                POST THREAD
+            <button onclick="handleNewThreadClick()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-200 hover:scale-[1.02] transition active:scale-95">
+                POST NEW THREAD
             </button>
 
-            <div class="bg-white border rounded shadow-sm">
-                <div class="p-3 border-b font-bold text-xs text-slate-500 uppercase tracking-wider" data-i18n="onlineStats">BOARD STATISTICS</div>
-                <div class="p-4 space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Threads:</span>
-                        <span id="stat-total-threads" class="font-bold">0</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">Messages:</span>
-                        <span id="stat-total-messages" class="font-bold">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border rounded shadow-sm">
-                <div class="p-3 border-b font-bold text-xs text-slate-500 uppercase tracking-wider" data-i18n="leaders">TOP CONTRIBUTORS</div>
-                <div id="leaderboard" class="p-3 space-y-3"></div>
+            <div class="sc-card p-6 shadow-sm">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Top Members</h4>
+                <div id="leaderboard" class="space-y-4"></div>
             </div>
         </aside>
     </main>
 
-    <div id="topic-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded shadow-2xl">
-            <div class="p-4 border-b flex justify-between items-center bg-slate-50">
-                <h2 class="font-bold" data-i18n="postThread">Post Thread</h2>
-                <button onclick="closeModal('topic-modal')" class="text-slate-400 hover:text-black">✕</button>
-            </div>
-            <div class="p-6">
-                <input id="new-title" type="text" data-i18n-placeholder="titlePlaceholder" class="w-full border p-3 rounded mb-4 outline-none focus:border-blue-500">
-                <textarea id="new-content" rows="6" data-i18n-placeholder="contentPlaceholder" class="w-full border p-3 rounded mb-4 outline-none focus:border-blue-500"></textarea>
-                <div class="flex items-center gap-4 mb-6">
-                    <label class="text-xs font-bold text-slate-500">Attach Image:</label>
-                    <input type="file" id="new-image" class="text-xs">
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button onclick="closeModal('topic-modal')" class="px-4 py-2 text-sm font-semibold" data-i18n="cancel">Cancel</button>
-                    <button id="btn-publish" onclick="createTopic()" class="btn-primary" data-i18n="publish">Post Thread</button>
-                </div>
+    <div id="cat-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl p-8 animate__animated animate__zoomIn animate__faster">
+            <h2 class="text-xl font-black mb-6">Create New Category</h2>
+            <input id="new-cat-name" type="text" placeholder="Category Name (e.g. Support)" class="w-full p-4 border rounded-xl mb-4 outline-none focus:border-blue-500">
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal('cat-modal')" class="font-bold text-slate-400">Cancel</button>
+                <button onclick="createCategory()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">Create</button>
             </div>
         </div>
     </div>
 
-    <div id="auth-modal" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded shadow-2xl p-8 text-center">
-            <h2 class="text-xl font-bold mb-6" data-i18n="login">Log In</h2>
-            <input id="auth-email" type="email" placeholder="Email" class="w-full border p-3 rounded mb-4 outline-none">
-            <input id="auth-pass" type="password" placeholder="Password" class="w-full border p-3 rounded mb-6 outline-none">
-            <button onclick="handleAuth()" class="w-full btn-primary py-3 rounded font-bold uppercase tracking-wider" data-i18n="login">Log In</button>
+    <div id="topic-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden animate__animated animate__fadeInUp animate__faster">
+            <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
+                <h2 class="font-black uppercase text-slate-500">Create New Thread</h2>
+                <button onclick="closeModal('topic-modal')" class="text-slate-300 hover:text-red-500">✕</button>
+            </div>
+            <div class="p-8">
+                <select id="topic-cat-select" class="w-full p-4 border rounded-xl mb-4 outline-none focus:border-blue-500 font-bold text-slate-600 bg-slate-50"></select>
+                <input id="topic-title" type="text" placeholder="Thread Title" class="w-full p-4 border rounded-xl mb-4 outline-none focus:border-blue-500">
+                <textarea id="topic-content" rows="6" placeholder="Write your content here..." class="w-full p-4 border rounded-xl mb-6 outline-none focus:border-blue-500 resize-none"></textarea>
+                <button onclick="createTopic()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black hover:bg-blue-700 shadow-lg shadow-blue-100 transition">PUBLISH THREAD</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] p-10 text-center animate__animated animate__fadeInUp">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-blue-200">S</div>
+            <h2 class="text-2xl font-black mb-2 uppercase">Welcome Back</h2>
+            <p class="text-slate-400 text-sm mb-8 font-medium">Log in or create an account to join the community.</p>
+            <input id="auth-email" type="email" placeholder="Email Address" class="w-full p-4 border rounded-xl mb-4 outline-none focus:border-blue-500 transition-all">
+            <input id="auth-pass" type="password" placeholder="Password" class="w-full p-4 border rounded-xl mb-8 outline-none focus:border-blue-500 transition-all">
+            <button onclick="handleAuth()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100">CONTINUE</button>
+            <button onclick="closeModal('auth-modal')" class="mt-6 text-sm font-bold text-slate-300 hover:text-slate-500 transition">Maybe later</button>
         </div>
     </div>
 
     <script>
-        const i18n = {
-            ru: { forums: "Форумы", members: "Пользователи", postThread: "СОЗДАТЬ ТЕМУ", onlineStats: "СТАТИСТИКА", leaders: "ТОП АВТОРОВ", mainCategory: "ОБЩЕЕ ОБСУЖДЕНИЕ", replies: "ОТВЕТЫ", postReply: "Ответить", titlePlaceholder: "Заголовок темы", contentPlaceholder: "Ваше сообщение...", replyPlaceholder: "Напишите ваш ответ...", cancel: "Отмена", publish: "Опубликовать", login: "Войти" },
-            en: { forums: "Forums", members: "Members", postThread: "POST THREAD", onlineStats: "BOARD STATISTICS", leaders: "TOP CONTRIBUTORS", mainCategory: "GENERAL DISCUSSIONS", replies: "REPLIES", postReply: "Post Reply", titlePlaceholder: "Thread Title", contentPlaceholder: "Your message...", replyPlaceholder: "Write a reply...", cancel: "Cancel", publish: "Post Thread", login: "Log In" },
-            he: { forums: "פורומים", members: "חברים", postThread: "צור נושא", onlineStats: "סטטיסטיקה", leaders: "מובילים", mainCategory: "דיונים כלליים", replies: "תגובות", postReply: "שלח תגובה", titlePlaceholder: "כותרת הנושא", contentPlaceholder: "ההודעה שלך...", replyPlaceholder: "כתוב תגובה...", cancel: "ביטול", publish: "פרסם נושא", login: "התחברות" }
-        };
-
+        // CONFIG
         const firebaseConfig = {
-  apiKey: "AIzaSyDiCZR0dPnvjcxajI6fswQot0z4SSMiDI0",
+            apiKey: "AIzaSyDiCZR0dPnvjcxajI6fswQot0z4SSMiDI0",
   authDomain: "turbo-f5f6d.firebaseapp.com",
   databaseURL: "https://turbo-f5f6d-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "turbo-f5f6d",
@@ -193,74 +162,150 @@
   messagingSenderId: "778985009405",
   appId: "1:778985009405:web:85b798b9c97d581822ce94"
         };
+        
+        // הגדרת ה-UID של האדמין (מצא אותו ב-Firebase Auth אחרי שנרשמת)
+        const ADMIN_UID = "PLACE_YOUR_UID_HERE"; 
 
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
-        let currentLang = 'ru', currentPostId = null;
+        const db = firebase.firestore(), auth = firebase.auth();
+        let currentLang = 'ru', currentCatId = null, currentPostId = null;
 
-        function changeLang(lang) {
-            currentLang = lang;
-            const grid = document.getElementById('main-grid');
-            if(lang === 'he') { document.body.classList.add('rtl'); grid.classList.add('rtl'); }
-            else { document.body.classList.remove('rtl'); grid.classList.remove('rtl'); }
-            document.querySelectorAll('[id^="lang-"]').forEach(b => b.classList.remove('active-lang'));
-            document.getElementById('lang-'+lang).classList.add('active-lang');
-            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[lang][el.getAttribute('data-i18n')]);
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.getAttribute('data-i18n-placeholder')]);
-            loadTopics();
-        }
-
-        function switchView(view) {
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active-view'));
-            document.getElementById('view-'+view).classList.add('active-view');
-        }
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
+        // AUTH SYSTEM
         async function handleAuth() {
             const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+            if(!e || !p) return alert("Fill all fields");
             try { await auth.signInWithEmailAndPassword(e, p); }
             catch {
-                const res = await auth.createUserWithEmailAndPassword(e, p);
-                await db.collection("users").doc(res.user.uid).set({ email: e, postsCount: 0, commsCount: 0 });
+                try {
+                    const res = await auth.createUserWithEmailAndPassword(e, p);
+                    await db.collection("users").doc(res.user.uid).set({ email: e, postsCount: 0, isAdmin: false });
+                } catch(err) { alert(err.message); }
             }
             closeModal('auth-modal');
         }
 
-        auth.onAuthStateChanged(user => {
-            const z = document.getElementById('user-zone');
+        auth.onAuthStateChanged(async user => {
+            const zone = document.getElementById('auth-zone');
             if(user) {
-                z.innerHTML = `<span class="text-xs font-bold text-slate-400 mr-2">${user.email.split('@')[0]}</span>
-                               <button onclick="auth.signOut()" class="text-[10px] uppercase font-bold text-blue-500">Logout</button>`;
+                const isAdmin = user.uid === ADMIN_UID;
+                if(isAdmin) document.getElementById('admin-controls').classList.remove('hidden');
+                
+                zone.innerHTML = `
+                    <div class="flex items-center gap-3 bg-white/5 p-1.5 pr-4 rounded-full border border-white/10">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-black text-xs">${user.email[0].toUpperCase()}</div>
+                        <div class="text-left">
+                            <div class="text-[10px] font-black text-white leading-none">${user.email.split('@')[0]} ${isAdmin ? '<span class="admin-badge ml-1">ADMIN</span>' : ''}</div>
+                            <button onclick="auth.signOut()" class="text-[9px] font-bold text-slate-400 hover:text-red-400">LOGOUT</button>
+                        </div>
+                    </div>`;
             } else {
-                z.innerHTML = `<button onclick="openModal('auth-modal')" class="btn-primary text-xs py-1.5">Login / Register</button>`;
+                document.getElementById('admin-controls').classList.add('hidden');
+                zone.innerHTML = `<button onclick="openModal('auth-modal')" class="bg-blue-600 text-white px-6 py-2 rounded-full font-black text-xs hover:bg-blue-700 transition">SIGN IN</button>`;
             }
-            loadTopics(); loadLeaderboard();
+            loadCategories(); loadLeaderboard();
         });
 
-        function loadTopics() {
-            db.collection("posts").orderBy("createdAt", "desc").onSnapshot(snap => {
-                const cont = document.getElementById('forum-content');
+        // VIEW & MODAL SYSTEM
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+            const target = document.getElementById('view-'+viewId);
+            target.classList.remove('hidden');
+            target.classList.add('animate__animated', 'animate__fadeIn');
+            window.scrollTo(0,0);
+        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // CATEGORY SYSTEM
+        async function createCategory() {
+            const name = document.getElementById('new-cat-name').value;
+            if(!name || auth.currentUser.uid !== ADMIN_UID) return;
+            await db.collection("categories").add({ name, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            document.getElementById('new-cat-name').value = '';
+            closeModal('cat-modal');
+        }
+
+        function loadCategories() {
+            db.collection("categories").orderBy("createdAt", "asc").onSnapshot(snap => {
+                const cont = document.getElementById('categories-container');
+                const select = document.getElementById('topic-cat-select');
+                cont.innerHTML = ''; select.innerHTML = '';
+                
+                snap.forEach(doc => {
+                    const cat = doc.data();
+                    // Home View Category Card
+                    cont.innerHTML += `
+                        <div class="sc-card shadow-md">
+                            <div class="bg-slate-50 px-6 py-4 border-b flex justify-between items-center cursor-pointer hover:bg-slate-100 transition" onclick="openCategory('${doc.id}', '${cat.name}')">
+                                <h3 class="font-black text-slate-600 uppercase tracking-tighter">${cat.name}</h3>
+                                <span class="text-[10px] font-bold text-slate-300">VIEW ALL</span>
+                            </div>
+                            <div id="cat-preview-${doc.id}" class="divide-y text-sm">
+                                <div class="p-8 text-center text-slate-300 italic font-medium">Loading topics...</div>
+                            </div>
+                        </div>`;
+                    // Modal Select
+                    select.innerHTML += `<option value="${doc.id}">${cat.name}</option>`;
+                    loadCategoryPreview(doc.id);
+                });
+            });
+        }
+
+        function loadCategoryPreview(catId) {
+            db.collection("posts").where("catId", "==", catId).orderBy("createdAt", "desc").limit(3).onSnapshot(snap => {
+                const cont = document.getElementById('cat-preview-'+catId);
                 cont.innerHTML = '';
-                document.getElementById('stat-total-threads').innerText = snap.size;
+                if(snap.empty) cont.innerHTML = '<div class="p-6 text-slate-300 text-xs text-center font-bold uppercase">No topics yet</div>';
                 snap.forEach(doc => {
                     const p = doc.data();
                     cont.innerHTML += `
-                        <div class="forum-item p-4 flex items-center gap-4 cursor-pointer" onclick="openPost('${doc.id}')">
-                            <div class="w-10 h-10 bg-slate-100 rounded flex items-center justify-center text-slate-400">💬</div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-blue-600 hover:underline">${p.title}</h3>
-                                <div class="text-[11px] text-slate-400 mt-1 uppercase font-semibold">
-                                    ${p.author.split('@')[0]} • ${p.createdAt?.toDate().toLocaleDateString() || 'Just now'}
+                        <div class="p-4 px-6 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition" onclick="openPost('${doc.id}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 bg-blue-50 rounded flex items-center justify-center text-blue-400 font-bold">💬</div>
+                                <div>
+                                    <h4 class="font-bold text-blue-600">${p.title}</h4>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase">${p.author.split('@')[0]}</p>
                                 </div>
                             </div>
-                            <div class="text-right hidden sm:block">
-                                <div class="text-xs font-bold text-slate-600">${p.views || 0} views</div>
+                            <div class="text-right">
+                                <div class="text-[10px] font-black text-slate-300">${p.views || 0} VIEWS</div>
                             </div>
                         </div>`;
                 });
             });
+        }
+
+        // TOPIC & COMMENT SYSTEM
+        function openCategory(id, name) {
+            currentCatId = id;
+            document.getElementById('forum-title').innerText = name;
+            switchView('forum');
+            db.collection("posts").where("catId", "==", id).orderBy("createdAt", "desc").onSnapshot(snap => {
+                const list = document.getElementById('topics-list');
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    list.innerHTML += `<div class="p-5 flex justify-between items-center hover:bg-slate-50 cursor-pointer" onclick="openPost('${doc.id}')">
+                        <div class="font-bold text-blue-600 underline">${p.title}</div>
+                        <div class="text-[10px] font-black text-slate-300 uppercase">${p.author.split('@')[0]}</div>
+                    </div>`;
+                });
+            });
+        }
+
+        async function createTopic() {
+            const catId = document.getElementById('topic-cat-select').value;
+            const title = document.getElementById('topic-title').value;
+            const content = document.getElementById('topic-content').value;
+            if(!title || !content || !auth.currentUser) return;
+            
+            await db.collection("posts").add({
+                catId, title, content, author: auth.currentUser.email, uid: auth.currentUser.uid,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(), views: 0
+            });
+            await db.collection("users").doc(auth.currentUser.uid).update({ postsCount: firebase.firestore.FieldValue.increment(1) });
+            closeModal('topic-modal');
+            switchView('home');
         }
 
         async function openPost(id) {
@@ -269,15 +314,16 @@
             const p = doc.data();
             db.collection("posts").doc(id).update({ views: (p.views || 0) + 1 });
             switchView('post');
-            document.getElementById('post-container').innerHTML = `
-                <div class="bg-slate-50 p-3 border-b flex justify-between text-xs text-slate-500 font-bold uppercase">
-                    <span>${p.author.split('@')[0]}</span>
-                    <span>${p.createdAt?.toDate().toLocaleDateString() || ''}</span>
-                </div>
-                <div class="p-6">
-                    <h1 class="text-2xl font-bold mb-4">${p.title}</h1>
-                    ${p.imageUrl ? `<img src="${p.imageUrl}" class="max-w-md rounded mb-4 shadow-sm">` : ''}
-                    <div class="text-slate-700 leading-relaxed">${p.content}</div>
+            document.getElementById('post-content').innerHTML = `
+                <div class="sc-card shadow-md">
+                    <div class="bg-slate-50 p-3 border-b flex justify-between text-[10px] font-black text-slate-400 uppercase">
+                        <span>${p.author.split('@')[0]}</span>
+                        <span>Thread Author</span>
+                    </div>
+                    <div class="p-8">
+                        <h1 class="text-3xl font-black text-slate-800 mb-6 tracking-tighter">${p.title}</h1>
+                        <div class="text-slate-600 leading-relaxed text-lg">${p.content}</div>
+                    </div>
                 </div>`;
             loadComments(id);
         }
@@ -288,37 +334,15 @@
                 list.innerHTML = '';
                 snap.forEach(doc => {
                     const c = doc.data();
-                    list.innerHTML += `<div class="p-4 border-b last:border-0 flex gap-4">
-                        <div class="w-10 h-10 bg-blue-50 rounded text-blue-500 flex items-center justify-center font-bold text-xs">${c.author[0].toUpperCase()}</div>
-                        <div>
-                            <div class="text-[11px] font-bold text-blue-600 mb-1 uppercase">${c.author.split('@')[0]}</div>
-                            <div class="text-sm text-slate-700">${c.text}</div>
+                    list.innerHTML += `<div class="bg-white p-5 border rounded-xl shadow-sm flex gap-4 animate__animated animate__fadeIn">
+                        <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center font-black text-blue-500">${c.author[0].toUpperCase()}</div>
+                        <div class="flex-1 text-sm">
+                            <div class="text-blue-600 font-black text-[10px] uppercase mb-1">${c.author.split('@')[0]}</div>
+                            <div class="text-slate-600">${c.text}</div>
                         </div>
                     </div>`;
                 });
             });
-        }
-
-        async function createTopic() {
-            if(!auth.currentUser) return openModal('auth-modal');
-            const t = document.getElementById('new-title').value, c = document.getElementById('new-content').value, file = document.getElementById('new-image').files[0];
-            const btn = document.getElementById('btn-publish');
-            btn.disabled = true; btn.innerText = "Posting...";
-
-            let url = null;
-            if(file) {
-                const ref = storage.ref(`posts/${Date.now()}`);
-                await ref.put(file);
-                url = await ref.getDownloadURL();
-            }
-
-            await db.collection("posts").add({
-                title: t, content: c, imageUrl: url, uid: auth.currentUser.uid, author: auth.currentUser.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(), views: 0
-            });
-            await db.collection("users").doc(auth.currentUser.uid).update({ postsCount: firebase.firestore.FieldValue.increment(1) });
-            closeModal('topic-modal');
-            btn.disabled = false; btn.innerText = "Post Thread";
         }
 
         async function addComment() {
@@ -333,15 +357,18 @@
                 const lb = document.getElementById('leaderboard'); lb.innerHTML = '';
                 snap.forEach(doc => {
                     const u = doc.data();
-                    lb.innerHTML += `<div class="flex justify-between items-center text-sm">
-                        <span class="font-semibold text-blue-600">${u.email.split('@')[0]}</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black text-slate-400">${u.postsCount}</span>
-                    </div>`;
+                    lb.innerHTML += `<div class="flex justify-between items-center"><span class="text-sm font-bold text-blue-600">${u.email.split('@')[0]}</span><span class="text-[10px] font-black text-slate-300">${u.postsCount} PTS</span></div>`;
                 });
             });
         }
 
-        changeLang('ru');
+        function handleNewThreadClick() {
+            if(!auth.currentUser) openModal('auth-modal');
+            else openModal('topic-modal');
+        }
+
+        function changeLang(l) { document.body.classList.toggle('rtl', l === 'he'); }
+
     </script>
 </body>
 </html>
