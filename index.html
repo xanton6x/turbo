@@ -3,40 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum TURBO | דף הבית</title>
+    <title>Forum TURBO | קהילות</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="container header-flex">
-            <div class="logo">FORUM<span>TURBO</span></div>
-            <nav class="nav-links">
-                <a href="index.html">בית</a>
-                <div id="auth-section">
-                    <button class="btn-gold" onclick="location.href='login.html'">התחברות / הרשמה</button>
-                </div>
-            </nav>
+            <div class="logo" onclick="location.href='index.html'">FORUM<span>TURBO</span></div>
+            <nav id="auth-section"></nav>
         </div>
     </header>
 
     <main class="container">
-        <div class="category-block">
-            <div class="cat-header">קהילה ודיונים</div>
-            
-            <div class="forum-row">
-                <div class="forum-info">
-                    <h3>דיונים כלליים</h3>
-                    <p>שיחות על כל נושא שבעולם</p>
-                </div>
-                <div class="forum-meta">1,240 הודעות</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:30px;">
+            <h2>קטגוריות הפורום</h2>
+            <button id="admin-add-cat" class="btn-gold" style="display:none;" onclick="document.getElementById('cat-modal').style.display='flex'">ניהול קטגוריות +</button>
+        </div>
+
+        <div id="categories-list">
             </div>
 
-            <div class="forum-row">
-                <div class="forum-info">
-                    <h3>חדשות ועדכונים</h3>
-                    <p>כל מה שחדש בקהילה</p>
-                </div>
-                <div class="forum-meta">85 הודעות</div>
+        <div id="cat-modal" class="modal">
+            <div class="modal-content">
+                <h3>צור קטגוריה חדשה</h3>
+                <input type="text" id="new-cat-name" placeholder="שם הקטגוריה">
+                <input type="text" id="new-cat-desc" placeholder="תיאור הקטגוריה">
+                <button id="save-cat-btn" class="btn-gold">שמור קטגוריה</button>
+                <button class="btn-delete" onclick="document.getElementById('cat-modal').style.display='none'">ביטול</button>
             </div>
         </div>
     </main>

@@ -11,6 +11,7 @@ body {
     color: var(--text);
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
+    line-height: 1.6;
 }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 0 15px; }
@@ -23,10 +24,8 @@ header {
 
 .header-flex { display: flex; justify-content: space-between; align-items: center; }
 
-.logo { font-weight: bold; font-size: 1.6rem; color: #fff; text-decoration: none; }
+.logo { font-weight: bold; font-size: 1.6rem; color: #fff; text-decoration: none; cursor: pointer; }
 .logo span { color: var(--gold); }
-
-.nav-links { display: flex; gap: 15px; align-items: center; }
 
 .btn-gold {
     background: var(--gold);
@@ -41,7 +40,8 @@ header {
 .category-block {
     background: var(--card);
     border: 1px solid var(--border);
-    margin-top: 40px;
+    margin-top: 20px;
+    border-radius: 4px;
 }
 
 .cat-header {
@@ -50,42 +50,29 @@ header {
     color: var(--gold);
     font-weight: bold;
     border-bottom: 1px solid var(--border);
+    cursor: pointer;
 }
 
 .forum-row {
     display: flex;
     justify-content: space-between;
-    padding: 20px;
+    padding: 15px 20px;
     border-bottom: 1px solid var(--border);
     transition: 0.2s;
+    align-items: center;
 }
 
 .forum-row:hover { background: #222; }
 
-.forum-info h3 { margin: 0; font-size: 1.15rem; color: #fff; }
-.forum-info p { margin: 5px 0 0; color: #888; font-size: 0.95rem; }
+.forum-info h3 { margin: 0; font-size: 1.1rem; color: #fff; }
+.forum-info p { margin: 5px 0 0; color: #888; font-size: 0.9rem; }
 
-/* Auth Styles */
-.auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
-.auth-box { background: var(--card); padding: 40px; border-radius: 4px; text-align: center; width: 350px; border: 1px solid var(--border); }
-.auth-box input { width: 100%; padding: 12px; margin: 10px 0; background: #121212; border: 1px solid var(--border); color: #fff; box-sizing: border-box; }
-
-@media (max-width: 768px) {
-    .header-flex { flex-direction: column; gap: 15px; }
-    .forum-row { flex-direction: column; gap: 10px; }
-}
-.forum-header-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 20px;
-}
-
+/* Modals */
 .modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex; justify-content: center; align-items: center;
+    background: rgba(0,0,0,0.85);
+    display: none; justify-content: center; align-items: center;
     z-index: 1000;
 }
 
@@ -99,21 +86,17 @@ header {
 
 .modal-content input, .modal-content textarea {
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     background: #121212;
     border: 1px solid var(--border);
     color: #fff;
-    padding: 10px;
+    padding: 12px;
+    box-sizing: border-box;
 }
 
-.modal-content textarea { height: 150px; }
-.btn-delete {
-    background: #ff4444;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    font-size: 0.7rem;
-    cursor: pointer;
-    border-radius: 2px;
+.btn-delete { background: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 0.8rem; }
+
+@media (max-width: 768px) {
+    .header-flex { flex-direction: column; gap: 15px; }
+    .forum-row { flex-direction: column; text-align: right; gap: 10px; }
 }
-.btn-delete:hover { background: #cc0000; }

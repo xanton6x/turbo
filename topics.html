@@ -2,34 +2,32 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>נושאים | Forum TURBO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="container header-flex">
-            <div class="logo" onclick="location.href='index.html'" style="cursor:pointer">FORUM<span>TURBO</span></div>
+            <div class="logo" onclick="location.href='index.html'">FORUM<span>TURBO</span></div>
             <nav id="auth-section"></nav>
         </div>
     </header>
 
     <main class="container">
-        <div class="forum-header-actions">
-            <h2 id="category-title">טוען קטגוריה...</h2>
-            <button id="new-topic-btn" class="btn-gold" style="display:none;">נושא חדש +</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:30px;">
+            <h2 id="cat-title-display">טוען...</h2>
+            <button id="new-topic-btn" class="btn-gold" style="display:none;" onclick="document.getElementById('topic-modal').style.display='flex'">נושא חדש +</button>
         </div>
 
-        <div id="topics-list" class="category-block">
-            </div>
+        <div id="topics-list" class="category-block"></div>
 
-        <div id="topic-modal" class="modal" style="display:none;">
+        <div id="topic-modal" class="modal">
             <div class="modal-content">
-                <h3>צור נושא חדש</h3>
-                <input type="text" id="topic-subject" placeholder="נושא ההודעה">
-                <textarea id="topic-content" placeholder="תוכן ההודעה..."></textarea>
-                <button id="save-topic" class="btn-gold">פרסם</button>
-                <button onclick="document.getElementById('topic-modal').style.display='none'">ביטול</button>
+                <h3>פרסום נושא חדש</h3>
+                <input type="text" id="topic-title-input" placeholder="כותרת הנושא">
+                <textarea id="topic-content-input" placeholder="תוכן ההודעה..." rows="5"></textarea>
+                <button id="save-topic-btn" class="btn-gold">פרסם נושא</button>
+                <button class="btn-delete" onclick="document.getElementById('topic-modal').style.display='none'">ביטול</button>
             </div>
         </div>
     </main>
