@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול פורום | TURBO</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="admin-page" style="display:none;">
+    <header>
+        <div class="container header-flex">
+            <div class="logo">ADMIN<span>PANEL</span></div>
+            <button class="btn-gold" onclick="location.href='index.html'">חזרה לפורום</button>
+        </div>
+    </header>
+    <main class="container">
+        <h2>ניהול משתמשים</h2>
+        <div id="users-list" class="category-block">
+            </div>
+    </main>
+    <script type="module">
+        import { auth } from './firebase-logic.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user && user.email === "anton@rcc.co.il") {
+                document.getElementById('admin-page').style.display = 'block';
+                // כאן תוכל להוסיף קוד שמושך את כל המשתמשים מאוסף "users" ב-Firestore
+            } else {
+                alert("גישה חסומה!");
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

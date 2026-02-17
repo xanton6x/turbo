@@ -88,3 +88,41 @@ if (sendReplyBtn) {
 // הרצת פונקציות לפי הדף הנוכחי
 if (window.location.pathname.includes('view-topic.html')) loadFullTopic();
 // (כאן אמורה להיות גם פונקציית loadTopics ששלחתי לך קודם עבור topics.html)
+// הוסף את המשתנה הזה בראש הקובץ
+const ADMIN_EMAIL = "toha400@gmail.com";
+
+// פונקציה לבדיקה אם המשתמש הוא אדמין
+function isAdmin() {
+    return auth.currentUser && auth.currentUser.email === ADMIN_EMAIL;
+}
+
+// עדכון פונקציית טעינת התגובות בתוך loadFullTopic
+// בתוך הלופ שיוצר את ה-HTML של התגובות (repliesList.innerHTML), הוסף כפתור מחיקה:
+querySnapshot.forEach((docSnap) => {
+    const reply = docSnap.data();
+    const deleteBtn = isAdmin() ? `<button onclick="deleteDocData('replies', '${docSnap.id}')" class="btn-delete">מחק תגובה</button>` : "";
+    
+    repliesList.innerHTML += `
+        <div class="category-block" style="padding: 15px; margin-bottom: 10px; border-right: 4px solid var(--gold);">
+            <div style="display:flex; justify-content:space-between;">
+                <p style="margin: 0; font-size: 0.85rem; color: #888;">${reply.authorName} כתב/ה:</p>
+                ${deleteBtn}
+            </div>
+            <p style="margin: 10px 0 0;">${reply.content}</p>
+        </div>
+    `;
+});
+
+// פונקציית מחיקה גלובלית (רק לאדמין)
+window.deleteDocData = async (collectionName, docId) => {
+    if (!isAdmin()) return alert("אין לך הרשאות מנהל!");
+    if (confirm("האם אתה בטוח שברצונך למחוק?")) {
+        try {
+            import { deleteDoc, doc as firestoreDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+            await deleteDoc(firestoreDoc(db, collectionName, docId));
+            location.reload();
+        } catch (e) {
+            alert("שגיאה במחיקה: " + e.message);
+        }
+    }
+};

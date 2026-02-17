@@ -107,3 +107,13 @@ header {
 }
 
 .modal-content textarea { height: 150px; }
+.btn-delete {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border-radius: 2px;
+}
+.btn-delete:hover { background: #cc0000; }
